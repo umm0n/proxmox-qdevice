@@ -1,30 +1,27 @@
 services:
   qnetd:
     container_name: proxmox-qdevice
-    image: bcleonard/proxmox-qdevice
+    image: umm0n/proxmox-qdevice
     build: .
     ports:
-      - "22:22"
+      - "222:22"
       - "5403:5403"
     environment:
-      - "NEW_ROOT_PASSWORD=CHANGEME"
+      - NEW_ROOT_PASSWORD={root_password}
     volumes:
       - /run/sshd
-      - <MY LOCAL STORAGE>:/etc/corosync
+      - /volume1/docker/proxmox-qdevice/data:/etc/corosync
     restart: unless-stopped
-    hostname: <MY FQDN>
-    networks: 
-      vlan:
-        ipv4_address: <MY IP ADDRESS>
+    hostname: {homename}
+    networks:
+      qnetlan:
+        ipv4_address: 172.18.1.10
 
 networks:
- vlan:
-    driver: macvlan
+  qnetlan:
+    driver: bridge
     driver_opts:
-      parent: <MY ETHERNET DEVICE>
+      parent: eth0
     ipam:
-       driver: default
-       config:
-        - subnet: "<MY SUBNET/MY RANGE"
-          ip_range: "<MY IP ADDRESS (same as above)>/32"
-          gateway: "<MY GATEWAY>"
+      config:
+        - subnet: "172.18.0.0/16"
